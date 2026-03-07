@@ -1,7 +1,7 @@
 package com.event.ems.service;
 
 import com.event.ems.dto.AuthResponse;
-import com.event.ems.dto.LoginRequest;
+import com.event.ems.dto.AuthRequest;
 import com.event.ems.model.UserModel;
 import com.event.ems.repo.UserRepo;
 import com.event.ems.utils.Jwt;
@@ -21,7 +21,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final Jwt jwtTokenUtil;
 
-    public AuthResponse login(LoginRequest req, HttpServletResponse response){
+    public AuthResponse login(AuthRequest req, HttpServletResponse response){
 
         UserModel user = userRepo.findByUsername(req.getUsername()).orElse(null);
         if (user == null) return new AuthResponse(null,null,"User not found");

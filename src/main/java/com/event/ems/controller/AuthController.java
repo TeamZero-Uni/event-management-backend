@@ -1,11 +1,8 @@
 package com.event.ems.controller;
 
-import com.event.ems.dto.AuthRequest;
 import com.event.ems.dto.AuthResponse;
-import com.event.ems.dto.LoginRequest;
+import com.event.ems.dto.AuthRequest;
 import com.event.ems.service.AuthService;
-import com.event.ems.service.UserService;
-import jakarta.persistence.ColumnResult;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req, HttpServletResponse res){
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req, HttpServletResponse res){
         AuthResponse response = authService.login(req, res);
         if(response.getError() != null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         return ResponseEntity.status(HttpStatus.OK).body(response);
