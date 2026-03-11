@@ -1,16 +1,14 @@
 package com.event.ems.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Data
 @Entity
-@Table(name = "event")
+@Table(name = "events")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventModel {
@@ -20,36 +18,32 @@ public class EventModel {
     @Column(name = "event_id")
     private Long id;
 
-    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "event_date", nullable = false)
     private LocalDate eventDate;
 
-    @Column(name = "start_time")
     private LocalTime startTime;
 
-    @Column(name = "end_time")
     private LocalTime endTime;
 
-    @Column(name = "venue")
-    private String venue;
-
-    @Column(name = "max_participants")
     private Integer maxParticipants;
 
-    @Column(name = "poster_url")
     private String posterUrl;
 
-    @Column(name = "created_by", nullable = false)
-    private String createdBy;
+    @Enumerated(EnumType.STRING)
+    private EventStatus status;
 
-    @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private EventType type;
 
-    @Column(name = "event_type")
-    private String eventType;
+    @ManyToOne
+    @JoinColumn(name = "venue_id")
+    private VenueModel venue;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private UserModel createdBy;
 }

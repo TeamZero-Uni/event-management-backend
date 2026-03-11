@@ -1,5 +1,6 @@
 package com.event.ems.service;
 
+import com.event.ems.model.Role;
 import com.event.ems.model.UserModel;
 import com.event.ems.repo.UserRepo;
 import jakarta.transaction.Transactional;
@@ -25,5 +26,32 @@ public class UserService implements UserDetailsService {
                 .password(data.getPassword())
                 .build();
         return user;
+    }
+
+    public String generateUsername(Role role) {
+
+        String prefix;
+
+        switch (role) {
+            case STUDENT:
+                prefix = "TG";
+                break;
+            case ORGANIZER:
+                prefix = "ORG";
+                break;
+            default:
+                prefix = "USR";
+        }
+
+        String lastUsername = userRepo.findLastUsernameByPrefix(prefix);
+
+        int nextNumber = 1;
+
+        if (lastUsername != null) {
+            String numberPart = lastUsername.substring(prefix.length());
+            nextNumber = Integer.parseInt(numberPart) + 1;
+        }
+
+        return prefix + String.format("%03d", nextNumber);
     }
 }
