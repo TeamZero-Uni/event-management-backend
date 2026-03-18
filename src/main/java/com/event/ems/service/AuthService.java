@@ -2,6 +2,7 @@ package com.event.ems.service;
 
 import com.event.ems.dto.AuthResponse;
 import com.event.ems.dto.AuthRequest;
+import com.event.ems.dto.MeResponse;
 import com.event.ems.exception.InvalidCredentialsException;
 import com.event.ems.exception.UserNotFoundException;
 import com.event.ems.model.UserModel;
@@ -10,10 +11,12 @@ import com.event.ems.utils.JwtHelp;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+
 
 @Service
 @Transactional
@@ -23,6 +26,7 @@ public class AuthService {
     private final UserRepo userRepo;
     private final AuthenticationManager authenticationManager;
     private final JwtHelp jwtTokenUtil;
+    private final ModelMapper mapper;
 
     public AuthResponse login(AuthRequest req, HttpServletResponse response){
 
@@ -103,12 +107,36 @@ public class AuthService {
 
         ResponseCookie delete = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false) // 👉 true in production (HTTPS)
+                .secure(false)
                 .path("/")
                 .maxAge(0)
                 .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", delete.toString());
+    }
+
+    public MeResponse authMe(String username){
+        UserModel user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        String batch = user.getStudentDetails() != null ? user.getStudentDetails().getBatch() : null;
+        String position = user.getOrganizerDetails() != null ? user.getOrganizerDetails().getPosition() : null;
+        String clubName = user.getOrganizerDetails() != null ? user.getOrganizerDetails().getClubName() : null;
+
+        return new MeResponse(
+                user.getUserId(),
+                user.getUsername(),
+                user.getFullname(),
+                user.getAddress(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getDepartment(),
+                user.getRole(),
+                user.getCreatedAt(),
+                batch,
+                position,
+                clubName
+        );
     }
 }
