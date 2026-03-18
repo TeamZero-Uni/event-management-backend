@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -30,6 +27,35 @@ public class AuthController {
                 true,
                 "Login successful",
                 auth,
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("refresh")
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken){
+        AuthResponse auth = authService.refreshToken(refreshToken);
+        ApiResponse<AuthResponse> response = new ApiResponse<>(
+                true,
+                "Refresh successful",
+                auth,
+                LocalDateTime.now()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<ApiResponse<String>> logout(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse res
+    ){
+        authService.logout(refreshToken, res);
+
+        ApiResponse<String> response = new ApiResponse<>(
+                true,
+                "Logout successful",
+                null,
                 LocalDateTime.now()
         );
 
