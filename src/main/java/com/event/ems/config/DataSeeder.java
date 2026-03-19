@@ -5,6 +5,7 @@ import com.event.ems.repo.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,8 @@ public class DataSeeder {
             RegistrationRepo registrationRepo,
             EventRepo eventRepo,
             StudentRepo studentRepo,
-            VenueRepo venueRepo) {
+            VenueRepo venueRepo,
+            PasswordEncoder encoder) {
         return args -> {
 
             if (userRepo.count() > 0) {
@@ -27,7 +29,7 @@ public class DataSeeder {
 
             UserModel admin = new UserModel();
             admin.setUsername("admin");
-            admin.setPassword("admin");
+            admin.setPassword(encoder.encode("admin"));
             admin.setFullname("System Admin");
             admin.setEmail("admin@ems.com");
             admin.setPhone("0710000000");
@@ -36,8 +38,8 @@ public class DataSeeder {
             userRepo.save(admin);
 
             UserModel student1 = new UserModel();
-            student1.setUsername("student1");
-            student1.setPassword("123456");
+            student1.setUsername("TG001");
+            student1.setPassword(encoder.encode("123456"));
             student1.setFullname("John Silva");
             student1.setEmail("john@ems.com");
             student1.setDepartment("Software Engineering");
@@ -47,7 +49,26 @@ public class DataSeeder {
             StudentModel s1 = new StudentModel();
             s1.setUser(student1);
             s1.setBatch("2022");
+            student1.setStudentDetails(s1);
             studentRepo.save(s1);
+
+            UserModel organizer = new UserModel();
+            organizer.setUsername("organizer1");
+            organizer.setPassword(encoder.encode("123456"));
+            organizer.setFullname("Nimal Perera");
+            organizer.setEmail("nimal@ems.com");
+            organizer.setPhone("0711111111");
+            organizer.setDepartment("Event Management");
+            organizer.setRole(Role.ORGANIZER);
+
+            OrganizersModel o1 = new OrganizersModel();
+            o1.setUser(organizer);
+            o1.setPosition("Event Coordinator");
+            o1.setClubName("Tech Club");
+
+            organizer.setOrganizerDetails(o1);
+
+            userRepo.save(organizer);
 
             VenueModel hall = new VenueModel();
             hall.setPlaceName("Main Hall");
@@ -69,11 +90,26 @@ public class DataSeeder {
             event1.setCreatedBy(admin);
             eventRepo.save(event1);
 
+            EventModel event2 = new EventModel();
+            event2.setTitle("Annual Music Festival");
+            event2.setDescription("Enjoy live music, food stalls, and fun activities");
+            event2.setEventDate(LocalDate.now().plusDays(10));
+            event2.setStartTime(LocalTime.of(16, 0));
+            event2.setEndTime(LocalTime.of(22, 0));
+            event2.setMaxParticipants(150);
+            event2.setPosterUrl("festival.jpg");
+            event2.setStatus(EventStatus.ACCEPTED);
+            event2.setType(EventType.FESTIVAL);
+            event2.setVenue(hall);
+            event2.setCreatedBy(organizer);
+
+            eventRepo.save(event2);
+
             RegistrationModel r1 = new RegistrationModel();
             r1.setEvent(event1);
             r1.setUser(student1);
             r1.setRegistrationDate(LocalDateTime.now());
-            r1.setStatus("APPROVED");
+            r1.setStatus(RegitrationStatus.APPROVED);
             registrationRepo.save(r1);
         };
     }

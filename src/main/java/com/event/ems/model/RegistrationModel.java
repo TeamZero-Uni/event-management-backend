@@ -26,5 +26,11 @@ public class RegistrationModel {
 
     private LocalDateTime registrationDate;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private RegitrationStatus status;
+
+    @PrePersist
+    protected void onCreate() {
+        this.registrationDate = LocalDateTime.now();
+    }
 }
