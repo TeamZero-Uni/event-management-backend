@@ -2,6 +2,7 @@ package com.event.ems.service;
 
 import com.event.ems.dto.AuthResponse;
 import com.event.ems.dto.AuthRequest;
+import com.event.ems.dto.MeResponse;
 import com.event.ems.exception.InvalidCredentialsException;
 import com.event.ems.exception.UserNotFoundException;
 import com.event.ems.model.UserModel;
@@ -10,10 +11,12 @@ import com.event.ems.utils.JwtHelp;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+
 
 @Service
 @Transactional
@@ -23,6 +26,7 @@ public class AuthService {
     private final UserRepo userRepo;
     private final AuthenticationManager authenticationManager;
     private final JwtHelp jwtTokenUtil;
+    private final ModelMapper mapper;
 
     public AuthResponse login(AuthRequest req, HttpServletResponse response){
 
@@ -43,20 +47,96 @@ public class AuthService {
         String accessToken = jwtTokenUtil.generateAccessToken(user);
         String refreshToken = jwtTokenUtil.generateReferenceToken(user);
 
-        user.setToken(accessToken);
+        user.setToken(refreshToken);
         userRepo.save(user);
 
         ResponseCookie cookie =  ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
-                .sameSite("Lux")
+                .sameSite("Lax")
                 .build();
-        response.addHeader("set-cookie", cookie.toString());
+        response.addHeader("Set-Cookie", cookie.toString());
 
         return new AuthResponse(
                 accessToken,
                 user.getUsername()
+        );
+    }
+
+    public AuthResponse refreshToken(String refreshToken){
+        if(refreshToken == null ||  refreshToken.isEmpty()){
+            throw new InvalidCredentialsException("Invalid refresh token");
+        }
+
+        String username = jwtTokenUtil.extractUsername(refreshToken);
+
+        UserModel user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        boolean isValid = jwtTokenUtil.isValid(refreshToken, user);
+
+        if(!isValid) throw new InvalidCredentialsException("Invalid refresh token");
+
+        String accessToken = jwtTokenUtil.generateAccessToken(user);
+
+        return new AuthResponse(
+                accessToken,
+                user.getUsername()
+        );
+    }
+
+    public void logout(String refreshToken, HttpServletResponse response){
+
+        try {
+            if (refreshToken != null && !refreshToken.isEmpty()) {
+
+                String username = jwtTokenUtil.extractUsername(refreshToken);
+
+                UserModel user = userRepo.findByUsername(username)
+                        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+                if (refreshToken.equals(user.getToken())) {
+                    user.setToken(null);
+                    userRepo.save(user);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        ResponseCookie delete = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader("Set-Cookie", delete.toString());
+    }
+
+    public MeResponse authMe(String username){
+        UserModel user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        String batch = user.getStudentDetails() != null ? user.getStudentDetails().getBatch() : null;
+        String position = user.getOrganizerDetails() != null ? user.getOrganizerDetails().getPosition() : null;
+        String clubName = user.getOrganizerDetails() != null ? user.getOrganizerDetails().getClubName() : null;
+
+        return new MeResponse(
+                user.getUserId(),
+                user.getUsername(),
+                user.getFullname(),
+                user.getAddress(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getDepartment(),
+                user.getRole(),
+                user.getCreatedAt(),
+                batch,
+                position,
+                clubName
         );
     }
 }
