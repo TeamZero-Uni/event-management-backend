@@ -37,6 +37,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleEventNotFound(EventNotFoundException ex) {
+
+        ApiResponse<Object> response = new ApiResponse<>(
+                false,
+                ex.getMessage(),
+                null,
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ApiResponse<Object>> handleInvalidCredentials(InvalidCredentialsException ex){
 

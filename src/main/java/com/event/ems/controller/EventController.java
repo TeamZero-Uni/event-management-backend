@@ -43,4 +43,9 @@ public class EventController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @DeleteMapping("{id}")
+    public ApiResponse<Long> deleteEventById(@PathVariable Long id) {
+        return eventService.deleteEventById(id);
+    }
+
 }

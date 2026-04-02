@@ -2,10 +2,12 @@ package com.event.ems.service;
 
 import com.event.ems.dto.ApiResponse;
 import com.event.ems.dto.EventRequest;
+import com.event.ems.exception.EventNotFoundException;
 import com.event.ems.exception.UserNotFoundException;
 import com.event.ems.exception.VenueNotFoundException;
 import com.event.ems.model.*;
 import com.event.ems.repo.EventRepo;
+import com.event.ems.repo.RegistrationRepo;
 import com.event.ems.repo.UserRepo;
 import com.event.ems.repo.VenueRepo;
 import jakarta.transaction.Transactional;
@@ -21,6 +23,7 @@ import java.util.List;
 public class EventService {
 
     private final EventRepo eventRepo;
+    private final RegistrationRepo registrationRepo;
     private final VenueRepo venueRepo;
     private final UserRepo userRepo;
 
@@ -109,5 +112,18 @@ public class EventService {
 
         EventModel savedEvent = eventRepo.save(event);
         return new ApiResponse<>(true, "Event created successfully", savedEvent, LocalDateTime.now());
+    }
+
+    public ApiResponse<Long> deleteEventById(Long id) {
+        if (!eventRepo.existsById(id)) {
+            throw new EventNotFoundException("Event not found: " + id);
+        }
+
+        if (registrationRepo.existsByEvent_Id(id)) {
+            throw new IllegalArgumentException("Cannot delete event because registrations already exist for this event");
+        }
+
+        eventRepo.deleteById(id);
+        return new ApiResponse<>(true, "Event deleted successfully", id, LocalDateTime.now());
     }
 }
