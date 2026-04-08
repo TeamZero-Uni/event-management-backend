@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -88,6 +89,7 @@ public class DataSeeder {
             event1.setType(EventType.WORKSHOP);
             event1.setVenue(hall);
             event1.setCreatedBy(admin);
+            event1.setBudget(new BigDecimal("50000.00"));
             eventRepo.save(event1);
 
             EventModel event2 = new EventModel();
@@ -102,6 +104,7 @@ public class DataSeeder {
             event2.setType(EventType.FESTIVAL);
             event2.setVenue(hall);
             event2.setCreatedBy(organizer);
+            event2.setBudget(new BigDecimal("120000.00"));
 
             eventRepo.save(event2);
 

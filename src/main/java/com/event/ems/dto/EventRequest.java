@@ -1,9 +1,8 @@
 package com.event.ems.dto;
 
-import com.event.ems.model.EventStatus;
-import com.event.ems.model.EventType;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -17,6 +16,7 @@ public class EventRequest {
     private LocalTime endTime;
     private Long venueId;
     private Integer maxParticipants;
+    private BigDecimal budget;
     private String description;
     private String posterUrl;
     private String status;
