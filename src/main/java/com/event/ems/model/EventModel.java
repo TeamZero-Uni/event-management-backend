@@ -3,6 +3,7 @@ package com.event.ems.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -108,6 +109,14 @@ public class EventModel {
         this.createdBy = createdBy;
     }
 
+    public BigDecimal getBudget() {
+        return budget;
+    }
+
+    public void setBudget(BigDecimal budget) {
+        this.budget = budget;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id")
@@ -141,4 +150,7 @@ public class EventModel {
     @ManyToOne
     @JoinColumn(name = "created_by")
     private UserModel createdBy;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal budget;
 }

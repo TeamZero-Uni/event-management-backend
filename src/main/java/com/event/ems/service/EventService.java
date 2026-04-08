@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -56,6 +57,14 @@ public class EventService {
         if (request.getStartTime() != null && request.getEndTime() != null
                 && !request.getEndTime().isAfter(request.getStartTime())) {
             throw new IllegalArgumentException("End time must be after start time");
+        }
+
+        if (request.getBudget() == null) {
+            throw new IllegalArgumentException("Budget is required");
+        }
+
+        if (request.getBudget().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Budget cannot be negative");
         }
 
         boolean hasTimeConflict = eventRepo.existsByVenueAndEventDateAndStartTimeLessThanAndEndTimeGreaterThan(
@@ -109,6 +118,7 @@ public class EventService {
         event.setStatus(eventStatus);
         event.setVenue(venue);
         event.setCreatedBy(user);
+        event.setBudget(request.getBudget());
 
         EventModel savedEvent = eventRepo.save(event);
         return new ApiResponse<>(true, "Event created successfully", savedEvent, LocalDateTime.now());
