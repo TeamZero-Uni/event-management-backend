@@ -19,7 +19,7 @@ public class EventController {
 
     private final EventService eventService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ApiResponse<List<EventModel>> getAllEvents() {
         return eventService.getAllEvents();
     }

@@ -45,9 +45,9 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/v1/**").permitAll()
-                        /*.requestMatchers("/api/v1/user/**").permitAll()
-                        .requestMatchers("/api/v1/students/**").hasRole("STUDENT")
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/events/all").permitAll()
+                        /*.requestMatchers("/api/v1/students/**").hasRole("STUDENT")
                         .requestMatchers("/api/v1/organizer/**").permitAll()*/
                         .anyRequest().authenticated()
                 )
