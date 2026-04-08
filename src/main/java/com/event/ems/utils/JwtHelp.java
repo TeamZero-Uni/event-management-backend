@@ -20,10 +20,10 @@ public class JwtHelp {
     }
 
     public String generateAccessToken(UserModel user){
-        return buildToken(user, 60 * 60 * 1000 * 24);
+        return buildToken(user, 10 * 60 * 1000);
     }
     public String generateReferenceToken(UserModel user){
-        return buildToken(user, 60 * 60 * 1000 * 24 * 7);
+        return buildToken(user, 7 * 24 * 60 * 60 * 1000);
     }
 
     public String buildToken(UserModel user, long expiry){
