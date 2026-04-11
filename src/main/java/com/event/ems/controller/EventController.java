@@ -24,6 +24,11 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<EventModel> getEventById(@PathVariable Long id) {
+        return eventService.getEventByIdResponse(id);
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<EventModel>> createEvent(
             @RequestBody EventRequest request,
@@ -46,6 +51,14 @@ public class EventController {
     @DeleteMapping("{id}")
     public ApiResponse<Long> deleteEventById(@PathVariable Long id) {
         return eventService.deleteEventById(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<EventModel>> updateEvent(
+            @PathVariable Long id,
+            @RequestBody EventRequest eventRequest) {
+        ApiResponse<EventModel> response = eventService.updateEvent(id, eventRequest);
+        return ResponseEntity.ok(response);
     }
 
 }
