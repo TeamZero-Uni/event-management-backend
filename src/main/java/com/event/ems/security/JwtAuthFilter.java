@@ -55,7 +55,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UserDetails userDetails = User.builder()
                         .username(userData.getUsername())
                         .password(userData.getPassword())
-                        .authorities("ROLE_" + userData.getRole())
                         .build();
 
                 UsernamePasswordAuthenticationToken auth =

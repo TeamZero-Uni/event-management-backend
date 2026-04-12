@@ -28,7 +28,7 @@ public class JwtHelp {
 
     public String buildToken(UserModel user, long expiry){
         return Jwts.builder()
-                .claim("role", user.getRole())
+                .claim("role", user.getRole().name())
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiry))

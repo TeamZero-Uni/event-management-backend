@@ -29,6 +29,9 @@ public class RegistrationModel {
     @Enumerated(EnumType.STRING)
     private RegitrationStatus status;
 
+    private String email;
+    private String tel_number;
+
     @PrePersist
     protected void onCreate() {
         this.registrationDate = LocalDateTime.now();
