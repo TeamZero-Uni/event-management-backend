@@ -121,15 +121,18 @@ public class EventService {
     }
 
     public ApiResponse<Long> deleteEventById(Long id) {
-        if (!eventRepo.existsById(id)) {
-            throw new EventNotFoundException("Event not found: " + id);
+        EventModel event = eventRepo.findById(id)
+                .orElseThrow(() -> new EventNotFoundException("Event not found: " + id));
+
+        if (event.getStatus() == EventStatus.ACCEPTED) {
+            throw new IllegalArgumentException("Cannot delete event because status is ACCEPTED");
         }
 
         if (registrationRepo.existsByEvent_Id(id)) {
             throw new IllegalArgumentException("Cannot delete event because registrations already exist for this event");
         }
 
-        eventRepo.deleteById(id);
+        eventRepo.delete(event);
         return new ApiResponse<>(true, "Event deleted successfully", id, LocalDateTime.now());
     }
 
