@@ -20,4 +20,5 @@ public class EventRequest {
     private String description;
     private String posterUrl;
     private String status;
+    private String docPath;
 }
