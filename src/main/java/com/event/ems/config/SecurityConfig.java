@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/events/all").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/events/*").permitAll()
+                        .requestMatchers("/api/v1/events/register").hasRole("STUDENT")
+                        .requestMatchers("/api/v1/files/upload-pdf").permitAll()
                         /*.requestMatchers("/api/v1/students/**").hasRole("STUDENT")
                         .requestMatchers("/api/v1/organizer/**").permitAll()*/
                         .anyRequest().authenticated()

@@ -117,6 +117,10 @@ public class EventModel {
         this.budget = budget;
     }
 
+    public String getDocPath(String docPath) {
+        return docPath;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id")
@@ -153,4 +157,7 @@ public class EventModel {
 
     @Column(precision = 12, scale = 2)
     private BigDecimal budget;
+
+    @Column(nullable = true)
+    private String docPath;
 }

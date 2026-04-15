@@ -115,6 +115,11 @@ public class EventService {
         event.setVenue(venue);
         event.setCreatedBy(user);
         event.setBudget(request.getBudget());
+        event.setDocPath(
+                (request.getDocPath() == null || request.getDocPath().isEmpty())
+                        ? null
+                        : request.getDocPath()
+        );
 
         EventModel savedEvent = eventRepo.save(event);
         return new ApiResponse<>(true, "Event created successfully", savedEvent, LocalDateTime.now());
