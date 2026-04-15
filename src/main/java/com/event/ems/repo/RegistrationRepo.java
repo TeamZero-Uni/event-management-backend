@@ -14,5 +14,5 @@ public interface RegistrationRepo extends JpaRepository <RegistrationModel,Long>
 
 	void deleteByEvent_Id(Long eventId);
 
-	Boolean  existsByUser_UserId(Long userId);
+	Boolean  existsByUser_UserIdAndEvent_Id(Long userId, long eventId);
 }

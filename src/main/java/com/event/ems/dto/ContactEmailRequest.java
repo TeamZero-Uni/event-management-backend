@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailRequest {
-    private String to;
+public class ContactEmailRequest {
+    private String name;
+    private String from;
     private String subject;
     private String body;
 }

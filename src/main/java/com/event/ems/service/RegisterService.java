@@ -19,22 +19,22 @@ public class RegisterService {
     private final EventRepo eventRepo;
 
     public void registerEvent(EventRegRequest request) {
-        System.out.println("REQUEST: " + request);
-        // 🔍 1. Find User
+
         UserModel user = userRepo.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🔍 2. Find Event
-        EventModel event = eventRepo.findById(user.getUserId())
+        EventModel event = eventRepo.findById(request.getEvent_id())
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        // ❌ Optional: prevent duplicate registration
-        Boolean alreadyRegistered = repo.existsByUser_UserId(user.getUserId());
+        boolean alreadyRegistered = repo.existsByUser_UserIdAndEvent_Id(
+                user.getUserId(),
+                event.getId()
+        );
+
         if (alreadyRegistered) {
             throw new RuntimeException("Already registered for this event");
         }
 
-        // 🧱 3. Create Registration
         RegistrationModel registration = new RegistrationModel();
         registration.setUser(user);
         registration.setEvent(event);
@@ -42,7 +42,6 @@ public class RegisterService {
         registration.setTel_number(request.getTelNumber());
         registration.setStatus(RegitrationStatus.valueOf(request.getStatus()));
 
-        // 💾 4. Save
         repo.save(registration);
     }
 }
