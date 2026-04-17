@@ -1,0 +1,28 @@
+package com.event.ems.controller;
+
+import com.event.ems.dto.ApiResponse;
+import com.event.ems.dto.UserResponse;
+import com.event.ems.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@RestController
+@RequestMapping("api/v1/users")
+@RequiredArgsConstructor
+public class UserController {
+
+	private final UserService userService;
+
+	@GetMapping
+	public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+		List<UserResponse> users = userService.getAllUsers();
+		return ResponseEntity.ok(new ApiResponse<>(true, "Users fetched successfully", users, LocalDateTime.now()));
+	}
+}
+
