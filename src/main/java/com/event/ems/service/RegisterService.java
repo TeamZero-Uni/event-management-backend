@@ -1,6 +1,7 @@
 package com.event.ems.service;
 
 import com.event.ems.dto.EventRegRequest;
+import com.event.ems.dto.RegistrationResponse;
 import com.event.ems.model.*;
 import com.event.ems.repo.EventRepo;
 import com.event.ems.repo.RegistrationRepo;
@@ -8,6 +9,8 @@ import com.event.ems.repo.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -43,5 +46,21 @@ public class RegisterService {
         registration.setStatus(RegitrationStatus.valueOf(request.getStatus()));
 
         repo.save(registration);
+    }
+
+    public List<RegistrationResponse> getAllRegistrations() {
+        return repo.findAll().stream()
+                .map(registration -> new RegistrationResponse(
+                        registration.getId(),
+                        registration.getEvent().getId(),
+                        registration.getEvent().getTitle(),
+                        registration.getUser().getUserId(),
+                        registration.getUser().getUsername(),
+                        registration.getEmail(),
+                        registration.getTel_number(),
+                        registration.getStatus(),
+                        registration.getRegistrationDate()
+                ))
+                .toList();
     }
 }
