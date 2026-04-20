@@ -38,8 +38,12 @@ public class JwtHelp {
 
     public String extractUsername(String token){
         Claims data = parse(token);
-        if(data == null) return null;
-        return data.get("sub").toString();
+        if(data == null) {
+            System.out.println("Invalid token");
+            return null;
+        }
+        System.out.println("Token Claims: " + data);
+        return data.getSubject();
     }
 
     private Claims parse(String token){
@@ -56,6 +60,7 @@ public class JwtHelp {
     }
 
     public boolean isValid(String token, UserModel user) {
-        return extractUsername(token).equals(user.getUsername());
+        String username = extractUsername(token);
+        return username != null && username.equals(user.getUsername());
     }
 }
