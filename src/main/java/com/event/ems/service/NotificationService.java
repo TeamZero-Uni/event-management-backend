@@ -46,6 +46,7 @@ public class NotificationService {
         NotificationModel notification = new NotificationModel();
         notification.setUser(receiver);
         notification.setEvent(event);
+        notification.setEventReferenceId(request.getEventId());
         notification.setMessage(request.getMessage().trim());
         notification.setIsRead(false);
 
@@ -54,7 +55,7 @@ public class NotificationService {
         NotificationResponse response = new NotificationResponse(
                 saved.getId(),
                 saved.getUser() != null ? saved.getUser().getUserId() : null,
-                saved.getEvent() != null ? saved.getEvent().getId() : null,
+                saved.getEvent() != null ? saved.getEvent().getId() : saved.getEventReferenceId(),
                 saved.getMessage(),
                 saved.getIsRead(),
                 saved.getCreatedAt()
