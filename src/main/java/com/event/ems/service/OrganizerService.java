@@ -1,9 +1,9 @@
 package com.event.ems.service;
 
 import com.event.ems.dto.ApiResponse;
+import com.event.ems.dto.OrganizerResponse;
 import com.event.ems.model.OrganizersModel;
 import com.event.ems.repo.OrganizerRepo;
-import com.event.ems.repo.StudentRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,12 +17,22 @@ import java.util.List;
 public class OrganizerService {
     private final OrganizerRepo organizerRepo;
 
-    public  ApiResponse<List<OrganizersModel>> getOrganizerCount() {
+    public ApiResponse<List<OrganizerResponse>> getAllOrganizers() {
         List<OrganizersModel> organizers = organizerRepo.findAll();
+
+        List<OrganizerResponse> organizerResponses = organizers.stream()
+                .map(organizer -> new OrganizerResponse(
+                        organizer.getId(),
+                        organizer.getUser().getUserId(),
+                        organizer.getPosition(),
+                        organizer.getClubName()
+                ))
+                .toList();
+
         return new ApiResponse<>(
                 true,
                 "Organizers fetched successfully",
-                organizers,
+                organizerResponses,
                 LocalDateTime.now()
         );
     }
