@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -62,5 +64,33 @@ public class NotificationService {
         );
 
         return new ApiResponse<>(true, "Notification created successfully", response, LocalDateTime.now());
+    }
+
+    public List<NotificationResponse> getMyNotifications(String username) {
+        UserModel user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return notificationRepo.findByUserOrderByCreatedAtDesc(user).stream()
+                .map(n -> new NotificationResponse(
+                        n.getId(),
+                        n.getUser() != null ? n.getUser().getUserId() : null,
+                        n.getEvent() != null ? n.getEvent().getId() : n.getEventReferenceId(),
+                        n.getMessage(),
+                        n.getIsRead(),
+                        n.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public void markAsRead(Long notificationId, String username) {
+        NotificationModel notification = notificationRepo.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        if (!notification.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        notification.setIsRead(true);
+        notificationRepo.save(notification);
     }
 }
