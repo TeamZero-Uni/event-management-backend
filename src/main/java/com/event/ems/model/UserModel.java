@@ -50,6 +50,9 @@ public class UserModel {
     @Column(name = "token")
     private String token;
 
+    @Column(name = "avatar", columnDefinition = "TEXT")
+    private String avatar;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentModel studentDetails;
 
