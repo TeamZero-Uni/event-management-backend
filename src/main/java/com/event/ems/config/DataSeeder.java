@@ -53,6 +53,21 @@ public class DataSeeder {
             student1.setStudentDetails(s1);
             studentRepo.save(s1);
 
+            UserModel student2 = new UserModel();
+            student2.setUsername("TG002");
+            student2.setPassword(encoder.encode("123456"));
+            student2.setFullname("John S");
+            student2.setEmail("joh@ems.com");
+            student2.setDepartment("Software Engineering");
+            student2.setRole(Role.STUDENT);
+            userRepo.save(student2);
+
+            StudentModel s2 = new StudentModel();
+            s2.setUser(student2);
+            s2.setBatch("2022");
+            student2.setStudentDetails(s2);
+            studentRepo.save(s2);
+
             UserModel organizer = new UserModel();
             organizer.setUsername("organizer1");
             organizer.setPassword(encoder.encode("123456"));

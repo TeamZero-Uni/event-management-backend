@@ -1,12 +1,13 @@
 package com.event.ems.controller;
 
+import com.event.ems.dto.ConformRequest;
 import com.event.ems.dto.ContactEmailRequest;
 import com.event.ems.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/email")
+@RequestMapping("api/v1/email")
 public class EmailController {
 
     @Autowired
@@ -18,5 +19,12 @@ public class EmailController {
             ) {
         emailService.sendContactEmail(request.getName(), request.getFrom(), request.getSubject(), request.getBody());
         return "Email sent successfully!";
+    }
+
+    @PostMapping("/conform")
+    public String conformMail(@RequestBody ConformRequest req) {
+        emailService.regConformMail(req);
+
+        return "Email sent successfully";
     }
 }
