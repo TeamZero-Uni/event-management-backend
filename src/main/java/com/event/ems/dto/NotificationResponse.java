@@ -12,6 +12,7 @@ public class NotificationResponse {
     private Long id;
     private Long userId;
     private Long eventId;
+    private Long eventReferenceId;
     private String message;
     private Boolean isRead;
     private LocalDateTime createdAt;
