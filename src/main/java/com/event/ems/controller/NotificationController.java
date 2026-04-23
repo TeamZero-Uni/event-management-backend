@@ -37,6 +37,17 @@ public class NotificationController {
         ));
     }
 
+    @GetMapping("/exclude-user/{userId}")
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getNotificationsExcludingUser(@PathVariable Long userId) {
+        List<NotificationResponse> notifications = notificationService.getNotificationsExcludingUser(userId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "Notifications fetched successfully",
+                notifications,
+                LocalDateTime.now()
+        ));
+    }
+
     @PutMapping("/{id}/read")
     public ResponseEntity<ApiResponse<String>> markAsRead(@PathVariable Long id, Authentication auth) {
         notificationService.markAsRead(id, auth.getName());

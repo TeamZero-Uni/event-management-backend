@@ -28,4 +28,7 @@ public interface NotificationRepo extends JpaRepository<NotificationModel, Long>
 			"ORDER BY n.createdAt DESC")
 	List<NotificationModel> findBroadcastsForStudentEvents(@Param("student") UserModel student);
 
+	@Query("SELECT n FROM NotificationModel n WHERE (n.user IS NULL OR n.user.userId <> :userId) ORDER BY n.createdAt DESC")
+	List<NotificationModel> findAllWhereUserIdNot(@Param("userId") Long userId);
+
 }
