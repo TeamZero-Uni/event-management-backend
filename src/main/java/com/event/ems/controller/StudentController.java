@@ -6,11 +6,7 @@ import com.event.ems.dto.StudentResponse;
 import com.event.ems.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,4 +26,10 @@ public class StudentController {
     public ResponseEntity<ApiResponse<StudentResponse>> createStudent(@RequestBody StudentCreateRequest request) {
         return ResponseEntity.ok(studentService.createStudent(request));
     }
+
+    @DeleteMapping("/{studentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteStudent(@PathVariable Long studentId) {
+        return ResponseEntity.ok(studentService.deleteStudent(studentId));
+    }
+
 }

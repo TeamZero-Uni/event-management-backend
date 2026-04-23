@@ -129,4 +129,23 @@ public class StudentService {
         }
         return value.trim();
     }
+
+    public ApiResponse<Void> deleteStudent(Long studentId) {
+        StudentModel student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+        UserModel user = student.getUser();
+
+        studentRepo.delete(student);
+        userRepo.delete(user);
+
+        return new ApiResponse<>(
+                true,
+                "Student deleted successfully",
+                null,
+                LocalDateTime.now()
+        );
+    }
+
+
 }
