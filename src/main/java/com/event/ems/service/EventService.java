@@ -129,9 +129,7 @@ public class EventService {
         EventModel event = eventRepo.findById(id)
                 .orElseThrow(() -> new EventNotFoundException("Event not found: " + id));
 
-        if (registrationRepo.existsByEvent_Id(id)) {
-            throw new IllegalArgumentException("Cannot delete event because registrations already exist for this event");
-        }
+        registrationRepo.deleteByEvent_Id(id);
 
         List<NotificationModel> relatedNotifications = notificationRepo.findByEvent_Id(id);
         for (NotificationModel notification : relatedNotifications) {
@@ -143,7 +141,7 @@ public class EventService {
         NotificationModel deleteNotification = new NotificationModel();
         deleteNotification.setUser(event.getCreatedBy());
         deleteNotification.setEventReferenceId(id);
-        deleteNotification.setMessage("Event deleted: '" + event.getTitle() + "' (status: " + event.getStatus() + ")");
+        deleteNotification.setMessage("The organizer has decided to cancel the event '" + event.getTitle() + "'. We apologize for any inconvenience this may cause.");
         deleteNotification.setIsRead(false);
         notificationRepo.save(deleteNotification);
 
