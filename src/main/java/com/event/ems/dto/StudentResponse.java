@@ -8,6 +8,7 @@ import lombok.Data;
 public class StudentResponse {
     private Long id;
     private String batch;
+    private Integer year;
     private Long userId;
     private String username;
     private String fullname;

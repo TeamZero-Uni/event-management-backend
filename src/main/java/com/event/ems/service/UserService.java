@@ -46,13 +46,18 @@ public class UserService implements UserDetailsService {
                 prefix = "USR";
         }
 
-        String lastUsername = userRepo.findLastUsernameByPrefix(prefix);
+        UserModel lastUser = userRepo.findTopByUsernameStartingWithOrderByUsernameDesc(prefix).orElse(null);
 
         int nextNumber = 1;
 
-        if (lastUsername != null) {
+        if (lastUser != null) {
+            String lastUsername = lastUser.getUsername();
             String numberPart = lastUsername.substring(prefix.length());
-            nextNumber = Integer.parseInt(numberPart) + 1;
+            try {
+                nextNumber = Integer.parseInt(numberPart) + 1;
+            } catch (NumberFormatException ignored) {
+                nextNumber = 1;
+            }
         }
 
         return prefix + String.format("%03d", nextNumber);
