@@ -25,6 +25,9 @@ public class NotificationModel {
     @JoinColumn(name = "event_id")
     private EventModel event;
 
+    // Keeps the event id even when event FK is cleared before deletion.
+    private Long eventReferenceId;
+
     @Column(columnDefinition = "TEXT")
     private String message;
 

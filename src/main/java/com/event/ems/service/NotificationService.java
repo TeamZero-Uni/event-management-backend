@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -46,6 +48,7 @@ public class NotificationService {
         NotificationModel notification = new NotificationModel();
         notification.setUser(receiver);
         notification.setEvent(event);
+        notification.setEventReferenceId(request.getEventId());
         notification.setMessage(request.getMessage().trim());
         notification.setIsRead(false);
 
@@ -55,11 +58,39 @@ public class NotificationService {
                 saved.getId(),
                 saved.getUser() != null ? saved.getUser().getUserId() : null,
                 saved.getEvent() != null ? saved.getEvent().getId() : null,
+                saved.getEventReferenceId(),
                 saved.getMessage(),
                 saved.getIsRead(),
                 saved.getCreatedAt()
         );
 
         return new ApiResponse<>(true, "Notification created successfully", response, LocalDateTime.now());
+    }
+
+    // Fetch notifications based on strictly registered events and Organizer role
+    public List<NotificationResponse> getMyNotifications(String username) {
+        UserModel student = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Aluth Repo method eka call karanawa
+        return notificationRepo.findBroadcastsForStudentEvents(student).stream()
+                .map(n -> new NotificationResponse(
+                        n.getId(),
+                        n.getUser() != null ? n.getUser().getUserId() : null,
+                        n.getEvent() != null ? n.getEvent().getId() : null, // event_id
+                        n.getEventReferenceId(), // event_reference_id
+                        n.getMessage(),
+                        n.getIsRead(),
+                        n.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public void markAsRead(Long notificationId, String username) {
+        NotificationModel notification = notificationRepo.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        notification.setIsRead(true);
+        notificationRepo.save(notification);
     }
 }

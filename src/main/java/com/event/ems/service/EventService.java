@@ -129,13 +129,21 @@ public class EventService {
         EventModel event = eventRepo.findById(id)
                 .orElseThrow(() -> new EventNotFoundException("Event not found: " + id));
 
-        if (event.getStatus() == EventStatus.ACCEPTED) {
-            throw new IllegalArgumentException("Cannot delete event because status is ACCEPTED");
-        }
+        registrationRepo.deleteByEvent_Id(id);
 
-        if (registrationRepo.existsByEvent_Id(id)) {
-            throw new IllegalArgumentException("Cannot delete event because registrations already exist for this event");
+        List<NotificationModel> relatedNotifications = notificationRepo.findByEvent_Id(id);
+        for (NotificationModel notification : relatedNotifications) {
+            notification.setEventReferenceId(id);
+            notification.setEvent(null);
         }
+        notificationRepo.saveAll(relatedNotifications);
+
+        NotificationModel deleteNotification = new NotificationModel();
+        deleteNotification.setUser(event.getCreatedBy());
+        deleteNotification.setEventReferenceId(id);
+        deleteNotification.setMessage("The organizer has decided to cancel the event '" + event.getTitle() + "'. We apologize for any inconvenience this may cause.");
+        deleteNotification.setIsRead(false);
+        notificationRepo.save(deleteNotification);
 
         eventRepo.delete(event);
         return new ApiResponse<>(true, "Event deleted successfully", id, LocalDateTime.now());
@@ -237,6 +245,7 @@ public class EventService {
             NotificationModel notification = new NotificationModel();
             notification.setUser(savedEvent.getCreatedBy());
             notification.setEvent(savedEvent);
+            notification.setEventReferenceId(savedEvent.getId());
             notification.setMessage("Event '" + savedEvent.getTitle() + "' updated: " + changeSummary);
             notification.setIsRead(false);
             notificationRepo.save(notification);
