@@ -61,4 +61,12 @@ public class EventController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<EventModel>> updateEventStatus(
+            @PathVariable Long id,
+            @RequestBody EventRequest eventRequest) {
+        ApiResponse<EventModel> response = eventService.updateEvent(id, eventRequest);
+        return ResponseEntity.ok(response);
+    }
+
 }

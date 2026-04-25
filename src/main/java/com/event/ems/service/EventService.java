@@ -269,6 +269,8 @@ public class EventService {
         String normalized = statusValue == null ? "" : statusValue.trim().toUpperCase();
         if ("APPROVED".equals(normalized)) {
             normalized = "ACCEPTED";
+        } else if ("REJECTED".equals(normalized)) {
+            normalized = "CANCELED";
         }
         try {
             return EventStatus.valueOf(normalized);

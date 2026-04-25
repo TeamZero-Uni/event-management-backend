@@ -23,4 +23,7 @@ public class StudentModel {
 
     @Column(name = "batch", length = 20)
     private String batch;
+
+    @Column(name = "year")
+    private Integer year;
 }

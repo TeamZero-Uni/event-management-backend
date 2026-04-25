@@ -50,6 +50,7 @@ public class DataSeeder {
             StudentModel s1 = new StudentModel();
             s1.setUser(student1);
             s1.setBatch("2022");
+            s1.setYear(1);
             student1.setStudentDetails(s1);
             studentRepo.save(s1);
 
