@@ -28,6 +28,30 @@ public class NotificationService {
     private final UserRepo userRepo;
     private final EventRepo eventRepo;
 
+    private NotificationResponse toResponse(NotificationModel notification) {
+        Long eventId = notification.getEvent() != null ? notification.getEvent().getId() : notification.getEventReferenceId();
+        String eventName = null;
+
+        if (notification.getEvent() != null) {
+            eventName = notification.getEvent().getTitle();
+        } else if (eventId != null) {
+            eventName = eventRepo.findById(eventId)
+                    .map(EventModel::getTitle)
+                    .orElse("Deleted event");
+        }
+
+        return new NotificationResponse(
+                notification.getId(),
+                notification.getUser() != null ? notification.getUser().getUserId() : null,
+                notification.getEvent() != null ? notification.getEvent().getId() : null,
+                eventName,
+                notification.getEventReferenceId(),
+                notification.getMessage(),
+                notification.getIsRead(),
+                notification.getCreatedAt()
+        );
+    }
+
     public ApiResponse<NotificationResponse> createNotification(NotificationRequest request) {
         if (request.getUserId() == null) {
             throw new IllegalArgumentException("User id is required");
@@ -54,15 +78,7 @@ public class NotificationService {
 
         NotificationModel saved = notificationRepo.save(notification);
 
-        NotificationResponse response = new NotificationResponse(
-                saved.getId(),
-                saved.getUser() != null ? saved.getUser().getUserId() : null,
-                saved.getEvent() != null ? saved.getEvent().getId() : null,
-                saved.getEventReferenceId(),
-                saved.getMessage(),
-                saved.getIsRead(),
-                saved.getCreatedAt()
-        );
+        NotificationResponse response = toResponse(saved);
 
         return new ApiResponse<>(true, "Notification created successfully", response, LocalDateTime.now());
     }
@@ -74,15 +90,7 @@ public class NotificationService {
 
         // Aluth Repo method eka call karanawa
         return notificationRepo.findBroadcastsForStudentEvents(student).stream()
-                .map(n -> new NotificationResponse(
-                        n.getId(),
-                        n.getUser() != null ? n.getUser().getUserId() : null,
-                        n.getEvent() != null ? n.getEvent().getId() : null, // event_id
-                        n.getEventReferenceId(), // event_reference_id
-                        n.getMessage(),
-                        n.getIsRead(),
-                        n.getCreatedAt()
-                ))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -92,5 +100,15 @@ public class NotificationService {
 
         notification.setIsRead(true);
         notificationRepo.save(notification);
+    }
+
+    public List<NotificationResponse> getNotificationsExcludingUser(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id is required");
+        }
+
+        return notificationRepo.findAllWhereUserIdNot(userId).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 }
