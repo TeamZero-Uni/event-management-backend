@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -25,6 +27,30 @@ public class NotificationService {
     private final NotificationRepo notificationRepo;
     private final UserRepo userRepo;
     private final EventRepo eventRepo;
+
+    private NotificationResponse toResponse(NotificationModel notification) {
+        Long eventId = notification.getEvent() != null ? notification.getEvent().getId() : notification.getEventReferenceId();
+        String eventName = null;
+
+        if (notification.getEvent() != null) {
+            eventName = notification.getEvent().getTitle();
+        } else if (eventId != null) {
+            eventName = eventRepo.findById(eventId)
+                    .map(EventModel::getTitle)
+                    .orElse("Deleted event");
+        }
+
+        return new NotificationResponse(
+                notification.getId(),
+                notification.getUser() != null ? notification.getUser().getUserId() : null,
+                notification.getEvent() != null ? notification.getEvent().getId() : null,
+                eventName,
+                notification.getEventReferenceId(),
+                notification.getMessage(),
+                notification.getIsRead(),
+                notification.getCreatedAt()
+        );
+    }
 
     public ApiResponse<NotificationResponse> createNotification(NotificationRequest request) {
         if (request.getUserId() == null) {
@@ -46,20 +72,43 @@ public class NotificationService {
         NotificationModel notification = new NotificationModel();
         notification.setUser(receiver);
         notification.setEvent(event);
+        notification.setEventReferenceId(request.getEventId());
         notification.setMessage(request.getMessage().trim());
         notification.setIsRead(false);
 
         NotificationModel saved = notificationRepo.save(notification);
 
-        NotificationResponse response = new NotificationResponse(
-                saved.getId(),
-                saved.getUser() != null ? saved.getUser().getUserId() : null,
-                saved.getEvent() != null ? saved.getEvent().getId() : null,
-                saved.getMessage(),
-                saved.getIsRead(),
-                saved.getCreatedAt()
-        );
+        NotificationResponse response = toResponse(saved);
 
         return new ApiResponse<>(true, "Notification created successfully", response, LocalDateTime.now());
+    }
+
+    // Fetch notifications based on strictly registered events and Organizer role
+    public List<NotificationResponse> getMyNotifications(String username) {
+        UserModel student = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Aluth Repo method eka call karanawa
+        return notificationRepo.findBroadcastsForStudentEvents(student).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public void markAsRead(Long notificationId, String username) {
+        NotificationModel notification = notificationRepo.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        notification.setIsRead(true);
+        notificationRepo.save(notification);
+    }
+
+    public List<NotificationResponse> getNotificationsExcludingUser(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id is required");
+        }
+
+        return notificationRepo.findAllWhereUserIdNot(userId).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 }
