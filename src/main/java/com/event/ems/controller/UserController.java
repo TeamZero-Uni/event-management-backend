@@ -33,7 +33,9 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> generateUsernameFromBody(@RequestBody Map<String, String> body) {
 		String roleInput = body != null ? body.get("role") : null;
 		Role parsedRole = parseAllowedRole(roleInput);
+		System.out.println(parsedRole);
 		String generatedUsername = userService.generateUsername(parsedRole);
+		System.out.println(generatedUsername);
 		return buildGeneratedUsernameResponse(generatedUsername);
 	}
 
