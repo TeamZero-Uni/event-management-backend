@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
     }
 
     public String generateUsername(Role role) {
-
+        System.out.println(role);
         String prefix;
 
         switch (role) {
@@ -46,13 +46,20 @@ public class UserService implements UserDetailsService {
                 prefix = "USR";
         }
 
-        String lastUsername = userRepo.findLastUsernameByPrefix(prefix);
-
+        UserModel lastUser = userRepo.findTopByUsernameStartingWithOrderByUsernameDesc(prefix).orElse(null);
+        System.out.println(lastUser.getUsername());
         int nextNumber = 1;
 
-        if (lastUsername != null) {
+        if (lastUser != null) {
+            String lastUsername = lastUser.getUsername();
+            System.out.println(lastUsername);
             String numberPart = lastUsername.substring(prefix.length());
-            nextNumber = Integer.parseInt(numberPart) + 1;
+            try {
+                nextNumber = Integer.parseInt(numberPart) + 1;
+                System.out.println(nextNumber);
+            } catch (NumberFormatException ignored) {
+                nextNumber = 1;
+            }
         }
 
         return prefix + String.format("%03d", nextNumber);
