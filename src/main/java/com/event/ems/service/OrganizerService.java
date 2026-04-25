@@ -47,7 +47,7 @@ public class OrganizerService {
 
     public ApiResponse<OrganizerResponse> createOrganizer(OrganizerCreateRequest request) {
         validateRequest(request);
-
+        System.out.println(request);
         String username = normalizeText(request.getUsername());
         if (username == null) {
             username = userService.generateUsername(Role.ORGANIZER);
@@ -67,7 +67,7 @@ public class OrganizerService {
         user.setPassword(passwordEncoder.encode(request.getPassword().trim()));
         user.setEmail(email);
         user.setRole(Role.ORGANIZER);
-        user.setFullname(request.getClubName().trim());
+        user.setFullname(request.getUsername().trim());
 
         UserModel savedUser = userRepo.save(user);
 
@@ -118,4 +118,22 @@ public class OrganizerService {
         }
         return value.trim();
     }
+
+    public ApiResponse<Void> deleteOrganizer(Long organizerId) {
+        OrganizersModel organizer = organizerRepo.findById(organizerId)
+                .orElseThrow(() -> new IllegalArgumentException("Organizer not found"));
+
+        UserModel user = organizer.getUser();
+
+        organizerRepo.delete(organizer);
+        userRepo.delete(user);
+
+        return new ApiResponse<>(
+                true,
+                "Organizer deleted successfully",
+                null,
+                LocalDateTime.now()
+        );
+    }
+
 }
