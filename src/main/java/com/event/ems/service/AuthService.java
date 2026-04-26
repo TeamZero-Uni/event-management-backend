@@ -1,10 +1,10 @@
 package com.event.ems.service;
 
-import com.event.ems.dto.AuthResponse;
-import com.event.ems.dto.AuthRequest;
+import com.event.ems.dto.auth.*;
 import com.event.ems.dto.MeResponse;
 import com.event.ems.exception.InvalidCredentialsException;
 import com.event.ems.exception.UserNotFoundException;
+import com.event.ems.factory.EmailFactory;
 import com.event.ems.model.UserModel;
 import com.event.ems.repo.UserRepo;
 import com.event.ems.utils.JwtHelp;
@@ -12,10 +12,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Service
@@ -27,6 +33,10 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtHelp jwtTokenUtil;
     private final ModelMapper mapper;
+    private final EmailFactory emailFactory;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public AuthResponse login(AuthRequest req, HttpServletResponse response){
 
@@ -41,7 +51,7 @@ public class AuthService {
                     )
             );
         } catch (Exception e) {
-            throw new InvalidCredentialsException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid password");
         }
 
         String accessToken = jwtTokenUtil.generateAccessToken(user);
@@ -74,7 +84,7 @@ public class AuthService {
         UserModel user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        boolean isValid = jwtTokenUtil.isValid(refreshToken, user);
+        boolean isValid = jwtTokenUtil.isValid(refreshToken, user, "refresh");
 
         if(!isValid) throw new InvalidCredentialsException("Invalid refresh token");
 
@@ -138,5 +148,53 @@ public class AuthService {
                 position,
                 clubName
         );
+    }
+
+    public void sendOtp(ForgotPasswordRequest req){
+        UserModel user = userRepo.findByUsername(req.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("User Not found"));
+        System.out.println(user.getEmail());
+        System.out.println(req.getEmail());
+        if(!user.getEmail().equals(req.getEmail())){
+            throw new InvalidCredentialsException("Invalid email");
+        }
+
+        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
+
+        user.setOtp(otp);
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+        userRepo.save(user);
+
+        Map<String, String> emailData = new HashMap<>();
+        emailData.put("otp", otp);
+        emailData.put("email", user.getEmail());
+
+        emailFactory.getService("OTP").send(emailData);
+    }
+
+    public void verifyOtp(VerifyOtpReq req){
+        UserModel user = userRepo.findByUsername(req.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (!req.getOtp().equals(user.getOtp())) {
+            throw new InvalidCredentialsException("Invalid OTP");
+        }
+
+        if (user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new InvalidCredentialsException("OTP expired");
+        }
+    }
+
+    public void resetPassword(ResetPasswordRequest req) {
+
+        UserModel user = userRepo.findByUsername(req.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+
+        user.setOtp(null);
+        user.setOtpExpiry(null);
+
+        userRepo.save(user);
     }
 }

@@ -53,6 +53,9 @@ public class UserModel {
     @Column(name = "avatar", columnDefinition = "TEXT")
     private String avatar;
 
+    private String otp;
+    private LocalDateTime otpExpiry;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentModel studentDetails;
 

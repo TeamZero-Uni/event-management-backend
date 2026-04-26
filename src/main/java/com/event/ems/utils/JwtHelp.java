@@ -20,15 +20,16 @@ public class JwtHelp {
     }
 
     public String generateAccessToken(UserModel user){
-        return buildToken(user, 10 * 60 * 1000);
+        return buildToken(user, 10 * 60 * 1000, "access");
     }
     public String generateReferenceToken(UserModel user){
-        return buildToken(user, 7 * 24 * 60 * 60 * 1000);
+        return buildToken(user, 7 * 24 * 60 * 60 * 1000, "refresh");
     }
 
-    public String buildToken(UserModel user, long expiry){
+    public String buildToken(UserModel user, long expiry, String type){
         return Jwts.builder()
                 .claim("role", user.getRole().name())
+                .claim("type", type )
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiry))
@@ -38,8 +39,12 @@ public class JwtHelp {
 
     public String extractUsername(String token){
         Claims data = parse(token);
-        if(data == null) return null;
-        return data.get("sub").toString();
+        if(data == null) {
+            System.out.println("Invalid token");
+            return null;
+        }
+        System.out.println("Token Claims: " + data);
+        return data.getSubject();
     }
 
     private Claims parse(String token){
@@ -55,7 +60,13 @@ public class JwtHelp {
         }
     }
 
-    public boolean isValid(String token, UserModel user) {
-        return extractUsername(token).equals(user.getUsername());
+    public boolean isValid(String token, UserModel user, String expectedType) {
+        Claims claims = parse(token);
+        if(claims == null) {
+            return false;
+        }
+        String username = claims.getSubject();
+        String type = claims.get("type", String.class);
+        return username.equals(user.getUsername()) && expectedType.equals(type);
     }
 }

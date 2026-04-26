@@ -3,6 +3,7 @@ package com.event.ems.service;
 import com.event.ems.dto.ApiResponse;
 import com.event.ems.dto.StudentCreateRequest;
 import com.event.ems.dto.StudentResponse;
+import com.event.ems.factory.EmailFactory;
 import com.event.ems.model.Role;
 import com.event.ems.dto.UserProfileDTO;
 import com.event.ems.model.EventModel;
@@ -11,6 +12,7 @@ import com.event.ems.model.StudentModel;
 import com.event.ems.model.UserModel;
 import com.event.ems.model.UserModel;
 import com.event.ems.repo.*;
+import com.event.ems.service.email.EmailService;
 import jakarta.servlet.Registration;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -33,6 +36,7 @@ public class StudentService {
     private final RegistrationRepo registrationRepo;
     private final NotificationRepo notificationRepo;
     private final EventRepo eventRepo;
+    private final EmailFactory emailFactory;
 
     public ApiResponse<List<StudentResponse>> getAllStudents() {
         List<StudentModel> students = studentRepo.findAll();
@@ -91,6 +95,14 @@ public class StudentService {
         StudentModel savedStudent = studentRepo.save(student);
 
         savedUser.setStudentDetails(savedStudent);
+
+        EmailService emailService = emailFactory.getService("CREDENTIALS");
+
+        emailService.send(Map.of(
+                "email", email,
+                "username", username,
+                "password", request.getPassword()
+        ));
 
         StudentResponse response = new StudentResponse(
                 savedStudent.getId(),

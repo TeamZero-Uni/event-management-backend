@@ -1,8 +1,7 @@
 package com.event.ems.controller;
 
 import com.event.ems.dto.ApiResponse;
-import com.event.ems.dto.AuthResponse;
-import com.event.ems.dto.AuthRequest;
+import com.event.ems.dto.auth.*;
 import com.event.ems.dto.MeResponse;
 import com.event.ems.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,5 +44,22 @@ public class AuthController {
     public ResponseEntity<ApiResponse<MeResponse>> me(Authentication auth) {
             MeResponse me = authService.authMe(auth.getName());
             return ResponseEntity.ok(new ApiResponse<>(true, "Fetching successful", me, LocalDateTime.now()));
+    }
+    @PostMapping("forgot-password")
+    public ResponseEntity<ApiResponse<String>>  forgotPassword(@RequestBody ForgotPasswordRequest req){
+        authService.sendOtp(req);
+        return ResponseEntity.ok(new ApiResponse<>(true,"OTP Sent to email",null, LocalDateTime.now()));
+    }
+
+    @PostMapping("verify-otp")
+    public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody VerifyOtpReq req) {
+        authService.verifyOtp(req);
+        return ResponseEntity.ok(new ApiResponse<>(true, "OTP verified", null, LocalDateTime.now()));
+    }
+
+    @PostMapping("reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest req) {
+        authService.resetPassword(req);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Password updated", null, LocalDateTime.now()));
     }
 }

@@ -3,10 +3,12 @@ package com.event.ems.service;
 import com.event.ems.dto.ApiResponse;
 import com.event.ems.dto.OrganizerCreateRequest;
 import com.event.ems.dto.OrganizerResponse;
+import com.event.ems.factory.EmailFactory;
 import com.event.ems.model.OrganizersModel;
 import com.event.ems.model.Role;
 import com.event.ems.model.UserModel;
 import com.event.ems.repo.*;
+import com.event.ems.service.email.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -26,6 +29,7 @@ public class OrganizerService {
     private final RegistrationRepo registrationRepo;
     private final NotificationRepo notificationRepo;
     private final EventRepo eventRepo;
+    private final EmailFactory emailFactory;
 
     public ApiResponse<List<OrganizerResponse>> getAllOrganizers() {
         List<OrganizersModel> organizers = organizerRepo.findAll();
@@ -80,6 +84,14 @@ public class OrganizerService {
         OrganizersModel savedOrganizer = organizerRepo.save(organizer);
 
         savedUser.setOrganizerDetails(savedOrganizer);
+
+        EmailService emailService = emailFactory.getService("CREDENTIALS");
+
+        emailService.send(Map.of(
+                "email", email,
+                "username", username,
+                "password", request.getPassword()
+        ));
 
         OrganizerResponse response = new OrganizerResponse(
                 savedOrganizer.getId(),

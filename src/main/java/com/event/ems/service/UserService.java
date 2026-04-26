@@ -7,6 +7,7 @@ import com.event.ems.model.UserModel;
 import com.event.ems.repo.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,6 +29,7 @@ public class UserService implements UserDetailsService {
         UserDetails user = User.builder()
                 .username(data.getUsername())
                 .password(data.getPassword())
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + data.getRole().name())))
                 .build();
         return user;
     }
