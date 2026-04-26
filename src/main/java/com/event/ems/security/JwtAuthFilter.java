@@ -34,7 +34,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getServletPath();
-        System.out.println("req path : " + path);
 
         if (path.equals("/api/v1/auth")) {
             filterChain.doFilter(request, response);
@@ -42,10 +41,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String authHeader = request.getHeader("Authorization");
-        System.out.println("Auth Header : " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("Auth Header is Not Valid ");
             filterChain.doFilter(request, response);
             return;
         }
@@ -54,11 +51,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         System.out.println("token : " + token);
 
         String username = jwt.extractUsername(token);
-        System.out.println("Extract Username : " + username);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserModel userData = repo.findByUsername(username).orElse(null);
-            if (userData != null && jwt.isValid(token, userData)) {
+            if (userData != null && jwt.isValid(token, userData, "access")) {
 
                 UserDetails userDetails = User.builder()
                         .username(userData.getUsername())
@@ -76,9 +72,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
-
-                System.out.println("Authentication Success");
-                System.out.println("Authorities: " + userDetails.getAuthorities());
             }
         }
         filterChain.doFilter(request, response);

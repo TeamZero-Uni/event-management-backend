@@ -1,4 +1,4 @@
-package com.event.ems.dto;
+package com.event.ems.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -47,12 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/events/all").permitAll()
-                                .requestMatchers("/api/v1/email/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/v1/events/*").permitAll()
+                        .requestMatchers("/api/v1/email/**").permitAll()
                         .requestMatchers("/api/v1/event/register").hasRole("STUDENT")
-                        /*.requestMatchers("/api/v1/files/upload-pdf").permitAll()*/
-                        /*.requestMatchers("/api/v1/students/**").hasRole("STUDENT")
-                        .requestMatchers("/api/v1/organizer/**").permitAll()*/
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
