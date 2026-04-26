@@ -1,11 +1,13 @@
 package com.event.ems.repo;
 
 import com.event.ems.model.EventModel;
+import com.event.ems.model.UserModel;
 import com.event.ems.model.VenueModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public interface EventRepo extends JpaRepository<EventModel, Long> {
 
@@ -40,5 +42,7 @@ public interface EventRepo extends JpaRepository<EventModel, Long> {
             LocalTime startTime,
             Long eventId
     );
+
+    List<EventModel> findByCreatedBy(UserModel user);
 
 }
