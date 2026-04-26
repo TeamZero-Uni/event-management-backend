@@ -3,6 +3,7 @@ package com.event.ems.repo;
 import com.event.ems.model.NotificationModel;
 import com.event.ems.model.UserModel;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -30,5 +31,9 @@ public interface NotificationRepo extends JpaRepository<NotificationModel, Long>
 
 	@Query("SELECT n FROM NotificationModel n WHERE (n.user IS NULL OR n.user.userId <> :userId) ORDER BY n.createdAt DESC")
 	List<NotificationModel> findAllWhereUserIdNot(@Param("userId") Long userId);
+
+	@Modifying
+	@Query("DELETE FROM NotificationModel n WHERE n.user.userId = :userId")
+	void deleteAllByUserId(@Param("userId") Long userId);
 
 }
