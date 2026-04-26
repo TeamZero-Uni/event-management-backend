@@ -1,5 +1,6 @@
 package com.event.ems.service;
 
+import com.event.ems.dto.UpdateUserRequest;
 import com.event.ems.dto.UserResponse;
 import com.event.ems.model.Role;
 import com.event.ems.model.UserModel;
@@ -79,5 +80,60 @@ public class UserService implements UserDetailsService {
                         user.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    public UserResponse updateUserById(Long userId, UpdateUserRequest request, String requesterUsername) {
+        UserModel targetUser = userRepo.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserModel requester = userRepo.findByUsername(requesterUsername)
+                .orElseThrow(() -> new RuntimeException("Requester not found"));
+
+        boolean isSelfUpdate = requester.getUserId().equals(targetUser.getUserId());
+        boolean isAdmin = requester.getRole() == Role.ADMIN;
+
+        if (!isSelfUpdate && !isAdmin) {
+            throw new RuntimeException("You can update only your own profile");
+        }
+
+        String fullname = firstNonBlank(request.getFullname(), request.getName());
+        String email = firstNonBlank(request.getEmail());
+        String address = firstNonBlank(request.getAddress(), request.getLocation());
+        String phone = firstNonBlank(request.getPhone(), request.getTel());
+
+        if (fullname != null) targetUser.setFullname(fullname);
+        if (address != null) targetUser.setAddress(address);
+        if (phone != null) targetUser.setPhone(phone);
+
+        if (email != null) {
+            UserModel existingByEmail = userRepo.findByEmail(email).orElse(null);
+            if (existingByEmail != null && !existingByEmail.getUserId().equals(targetUser.getUserId())) {
+                throw new IllegalArgumentException("Email is already in use");
+            }
+            targetUser.setEmail(email);
+        }
+
+        userRepo.save(targetUser);
+
+        return new UserResponse(
+                targetUser.getUserId(),
+                targetUser.getUsername(),
+                targetUser.getFullname(),
+                targetUser.getAddress(),
+                targetUser.getEmail(),
+                targetUser.getPhone(),
+                targetUser.getDepartment(),
+                targetUser.getRole(),
+                targetUser.getCreatedAt()
+        );
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+        return null;
     }
 }
