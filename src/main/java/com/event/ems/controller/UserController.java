@@ -1,12 +1,16 @@
 package com.event.ems.controller;
 
 import com.event.ems.dto.ApiResponse;
+import com.event.ems.dto.UpdateUserRequest;
 import com.event.ems.dto.UserResponse;
 import com.event.ems.model.Role;
 import com.event.ems.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,19 +27,26 @@ public class UserController {
 
 	private final UserService userService;
 
-	@GetMapping
+	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
 		List<UserResponse> users = userService.getAllUsers();
 		return ResponseEntity.ok(new ApiResponse<>(true, "Users fetched successfully", users, LocalDateTime.now()));
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<ApiResponse<UserResponse>> updateUserById(
+			@PathVariable("id") Long id,
+			@RequestBody UpdateUserRequest request,
+			Authentication authentication) {
+		UserResponse updated = userService.updateUserById(id, request, authentication.getName());
+		return ResponseEntity.ok(new ApiResponse<>(true, "User updated successfully", updated, LocalDateTime.now()));
 	}
 
 	@PostMapping("/generate-username")
 	public ResponseEntity<ApiResponse<String>> generateUsernameFromBody(@RequestBody Map<String, String> body) {
 		String roleInput = body != null ? body.get("role") : null;
 		Role parsedRole = parseAllowedRole(roleInput);
-		System.out.println(parsedRole);
 		String generatedUsername = userService.generateUsername(parsedRole);
-		System.out.println(generatedUsername);
 		return buildGeneratedUsernameResponse(generatedUsername);
 	}
 

@@ -4,6 +4,10 @@ import com.event.ems.model.EventModel;
 import com.event.ems.model.UserModel;
 import com.event.ems.model.VenueModel;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -42,6 +46,11 @@ public interface EventRepo extends JpaRepository<EventModel, Long> {
             LocalTime startTime,
             Long eventId
     );
+
+    @Modifying
+    @Query("DELETE FROM EventModel e WHERE e.createdBy.userId = :userId")
+    void deleteAllByCreatedByUserId(@Param("userId") Long userId);
+
 
     List<EventModel> findByCreatedBy(UserModel user);
 
