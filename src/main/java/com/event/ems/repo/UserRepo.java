@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface UserRepo extends JpaRepository<UserModel,String> {
     Optional<UserModel> findByUsername(String username);
     Optional<UserModel> findByUserId(Long id);
+    Optional<UserModel> findByEmail(String email);
 
     @Query("SELECT u.username FROM UserModel u WHERE u.username LIKE ?1% ORDER BY u.username DESC LIMIT 1")
     String findLastUsernameByPrefix(String prefix);
