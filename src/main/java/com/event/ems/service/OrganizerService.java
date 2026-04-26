@@ -6,8 +6,7 @@ import com.event.ems.dto.OrganizerResponse;
 import com.event.ems.model.OrganizersModel;
 import com.event.ems.model.Role;
 import com.event.ems.model.UserModel;
-import com.event.ems.repo.OrganizerRepo;
-import com.event.ems.repo.UserRepo;
+import com.event.ems.repo.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +23,9 @@ public class OrganizerService {
     private final UserRepo userRepo;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final RegistrationRepo registrationRepo;
+    private final NotificationRepo notificationRepo;
+    private final EventRepo eventRepo;
 
     public ApiResponse<List<OrganizerResponse>> getAllOrganizers() {
         List<OrganizersModel> organizers = organizerRepo.findAll();
@@ -124,6 +126,11 @@ public class OrganizerService {
                 .orElseThrow(() -> new IllegalArgumentException("Organizer not found"));
 
         UserModel user = organizer.getUser();
+        Long userId = user.getUserId();
+
+        registrationRepo.deleteAllByUserId(userId);
+        notificationRepo.deleteAllByUserId(userId);
+        eventRepo.deleteAllByCreatedByUserId(userId);
 
         organizerRepo.delete(organizer);
         userRepo.delete(user);

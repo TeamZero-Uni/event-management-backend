@@ -10,9 +10,8 @@ import com.event.ems.model.RegistrationModel;
 import com.event.ems.model.StudentModel;
 import com.event.ems.model.UserModel;
 import com.event.ems.model.UserModel;
-import com.event.ems.repo.RegistrationRepo;
-import com.event.ems.repo.StudentRepo;
-import com.event.ems.repo.UserRepo;
+import com.event.ems.repo.*;
+import jakarta.servlet.Registration;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +31,8 @@ public class StudentService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final RegistrationRepo registrationRepo;
+    private final NotificationRepo notificationRepo;
+    private final EventRepo eventRepo;
 
     public ApiResponse<List<StudentResponse>> getAllStudents() {
         List<StudentModel> students = studentRepo.findAll();
@@ -137,11 +138,17 @@ public class StudentService {
         return value.trim();
     }
 
+    @Transactional
     public ApiResponse<Void> deleteStudent(Long studentId) {
         StudentModel student = studentRepo.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         UserModel user = student.getUser();
+        Long userId = user.getUserId();
+
+        registrationRepo.deleteAllByUserId(userId);
+        notificationRepo.deleteAllByUserId(userId);
+        eventRepo.deleteAllByCreatedByUserId(userId);
 
         studentRepo.delete(student);
         userRepo.delete(user);

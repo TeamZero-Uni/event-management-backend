@@ -3,9 +3,11 @@ package com.event.ems.controller;
 import com.event.ems.dto.ApiResponse;
 import com.event.ems.dto.EventRequest;
 import com.event.ems.model.EventModel;
+import com.event.ems.repo.EventRepo;
 import com.event.ems.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,7 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+    private final EventRepo eventRepo;
 
     @GetMapping("/all")
     public ApiResponse<List<EventModel>> getAllEvents() {
@@ -42,9 +45,7 @@ public class EventController {
         }
 
         String loggedInUsername = principal.getName();
-
         ApiResponse<EventModel> response = eventService.createEvent(request, loggedInUsername);
-
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
