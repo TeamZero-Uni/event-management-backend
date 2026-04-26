@@ -52,4 +52,6 @@ public interface EventRepo extends JpaRepository<EventModel, Long> {
     void deleteAllByCreatedByUserId(@Param("userId") Long userId);
 
 
+    List<EventModel> findByCreatedBy(UserModel user);
+
 }
